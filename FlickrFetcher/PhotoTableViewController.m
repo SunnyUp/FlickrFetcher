@@ -8,6 +8,7 @@
 
 #import "PhotoTableViewController.h"
 #import "FlickrFetcher.h"
+#import "PhotoDisplayViewController.h"
 
 @interface PhotoTableViewController ()
 
@@ -20,13 +21,12 @@
 
 - (IBAction)refresh:(id)sender
 {
-
     UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     [spinner startAnimating];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
     
-    dispatch_queue_t downloadQueue = dispatch_queue_create("flickr downloader", NULL);
-    dispatch_sync(downloadQueue , ^{
+    dispatch_queue_t downloadQueue = dispatch_queue_create("flickr photo downloader", NULL);
+    dispatch_async(downloadQueue , ^{
         NSArray *photos = [FlickrFetcher photosInPlace:self.place maxResults:50];
 //        NSLog(@"%@", photos);
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -42,7 +42,10 @@
     if(_place != place)
     {
         _place = place;
-        [self.tableView reloadData];
+//        if(self.tableView.window) [self.tableView reloadData];
+        
+        id sender = self.navigationItem.rightBarButtonItem;
+        [self refresh:sender];
     }
 }
 
@@ -56,7 +59,7 @@
     if(_photos != photos)
     {
         _photos = photos;
-        [self.tableView reloadData];
+        if(self.tableView.window) [self.tableView reloadData];
     }
 }
 
@@ -75,8 +78,22 @@
     
     // Configure the cell...
     NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
-    cell.textLabel.text = [photo objectForKey:FLICKR_PHOTO_TITLE];
-    cell.detailTextLabel.text = [photo objectForKey:FLICKR_PHOTO_OWNER];
+    NSString *title, *description, *auther;
+    title = [photo objectForKey:FLICKR_PHOTO_TITLE];
+    description = [photo valueForKeyPath:FLICKR_PHOTO_DESCRIPTION];
+//    NSLog(@"%@", description);
+    auther = [photo objectForKey:FLICKR_PHOTO_OWNER];
+    if(title && title.length)
+        cell.textLabel.text = title;
+    else if(description && description.length)
+        cell.textLabel.text = description;
+    else
+        cell.textLabel.text = @"Unknown";
+    
+    if(!title || !title.length || !description || !description.length)
+        cell.detailTextLabel.text = auther;
+    else
+        cell.detailTextLabel.text = description;
     
     return cell;
 }
@@ -131,6 +148,17 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"Photo Display Segue"])
+    {
+        PhotoDisplayViewController *vc = segue.destinationViewController;
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
+        vc.photo = photo;
+    }
 }
 
 @end

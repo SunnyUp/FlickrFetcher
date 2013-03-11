@@ -25,7 +25,7 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
     
     dispatch_queue_t downloadQueue = dispatch_queue_create("flickr downloader", NULL);
-    dispatch_sync(downloadQueue , ^{
+    dispatch_async(downloadQueue , ^{
         NSArray *topPlaces = [FlickrFetcher topPlaces];
         //    NSLog(@"%@", photos);
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -41,7 +41,7 @@
     if(_topPlaces != topPlaces)
     {
         _topPlaces = topPlaces;
-        [self.tableView reloadData];
+        if(self.tableView.window) [self.tableView reloadData];
     }
 }
 
@@ -79,7 +79,7 @@
     NSRange range = [placeName rangeOfString:@","];
     if(range.location != NSNotFound)
     {
-        cityName = [placeName substringToIndex:range.location - 1];
+        cityName = [placeName substringToIndex:range.location];
         countryName = [placeName substringFromIndex:range.location + 1];
     }
     if(!cityName || !cityName.length)
@@ -87,8 +87,6 @@
     
     cell.textLabel.text = cityName;
     cell.detailTextLabel.text = countryName;
-    
-    
     
     return cell;
 }
