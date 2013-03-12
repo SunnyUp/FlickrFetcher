@@ -10,4 +10,6 @@
 
 @interface PhotoDisplayViewController : UIViewController
 @property (nonatomic, strong) NSDictionary *photo;
+
+- (void)refresh;
 @end

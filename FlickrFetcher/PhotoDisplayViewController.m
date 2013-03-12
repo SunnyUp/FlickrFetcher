@@ -9,7 +9,7 @@
 #import "PhotoDisplayViewController.h"
 #import "FlickrFetcher.h"
 
-@interface PhotoDisplayViewController () <UIScrollViewDelegate>
+@interface PhotoDisplayViewController () <UIScrollViewDelegate, UISplitViewControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @end
@@ -27,26 +27,46 @@
 //    return self;
 //}
 
-- (void)viewDidLoad
+- (void)refresh
 {
-    [super viewDidLoad];
-	// Do any additional setup after loading the view.
     if(self.photo)
     {
+        self.navigationItem.title = [self.photo objectForKey:FLICKR_PHOTO_TITLE];
+        
+        UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        [spinner startAnimating];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
+        
         dispatch_queue_t downloadQueue = dispatch_queue_create("Flickr Image Downloader", NULL);
         dispatch_async(downloadQueue, ^{
             NSURL *imageUrl = [FlickrFetcher urlForPhoto:self.photo format:FlickrPhotoFormatLarge];
             NSData *imageData = [NSData dataWithContentsOfURL:imageUrl];
             UIImage *image = [UIImage imageWithData:imageData];
             dispatch_async(dispatch_get_main_queue(), ^{
+                self.navigationItem.rightBarButtonItem = nil;
                 self.imageView.image = image;
                 
                 self.scrollView.contentSize = image.size;
-                self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height);              
+                self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height);
             });
         });
-//        dispatch_release(downloadQueue);
+        //        dispatch_release(downloadQueue);
     }
+}
+
+- (void)awakeFromNib
+{
+    [super awakeFromNib];
+    
+    self.splitViewController.delegate = self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+	// Do any additional setup after loading the view.
+    self.scrollView.delegate = self;
+    [self refresh];
 }
 
 //- (void)didReceiveMemoryWarning

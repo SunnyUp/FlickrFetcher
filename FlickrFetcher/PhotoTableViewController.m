@@ -148,6 +148,12 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
+    
+    NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
+    UINavigationController *NVC = [self.splitViewController.viewControllers lastObject];
+    PhotoDisplayViewController *detailVC = NVC.topViewController;
+    detailVC.photo = photo;
+    [detailVC refresh];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
