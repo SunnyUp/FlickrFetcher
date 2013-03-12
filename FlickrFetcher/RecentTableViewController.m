@@ -1,87 +1,82 @@
 //
-//  PhotoTableViewController.m
+//  RecentTableViewController.m
 //  FlickrFetcher
 //
-//  Created by SunnyUp on 13-3-10.
+//  Created by SunnyUp on 13-3-12.
 //  Copyright (c) 2013年 SunnyUp. All rights reserved.
 //
 
-#import "PhotoTableViewController.h"
+#import "RecentTableViewController.h"
 #import "FlickrFetcher.h"
 #import "PhotoDisplayViewController.h"
 
-@interface PhotoTableViewController ()
-
+@interface RecentTableViewController ()
+@property (nonatomic, strong) NSArray *recentPhotos;
 @end
 
-@implementation PhotoTableViewController
+@implementation RecentTableViewController
 
-@synthesize photos = _photos;
-@synthesize place = _place;
+@synthesize recentPhotos = _recentPhotos;
 
-- (IBAction)refresh:(id)sender
+//- (id)initWithStyle:(UITableViewStyle)style
+//{
+//    self = [super initWithStyle:style];
+//    if (self) {
+//        // Custom initialization
+//    }
+//    return self;
+//}
+
+- (void)viewWillAppear:(BOOL)animated
 {
-    UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    [spinner startAnimating];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
+    [super viewWillAppear:animated];
     
-    dispatch_queue_t downloadQueue = dispatch_queue_create("flickr photo downloader", NULL);
-    dispatch_async(downloadQueue , ^{
-        NSArray *photos = [FlickrFetcher photosInPlace:self.place maxResults:50];
-//        NSLog(@"%@", photos);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.navigationItem.rightBarButtonItem = sender;
-            self.photos = photos;
-        });
-    });
-//    dispatch_release(downloadQueue);
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSArray *photos = [defaults objectForKey:RECENT_PHOTOS_KEY];
+    self.recentPhotos = photos;
+    
+    [self.tableView reloadData];
 }
 
-- (void)setPlace:(NSDictionary *)place
+- (void)viewDidLoad
 {
-    if(_place != place)
-    {
-        _place = place;
-//        if(self.tableView.window) [self.tableView reloadData];
-        
-        id sender = self.navigationItem.rightBarButtonItem;
-        [self refresh:sender];
-    }
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+ 
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
+
+//- (void)didReceiveMemoryWarning
+//{
+//    [super didReceiveMemoryWarning];
+//    // Dispose of any resources that can be recreated.
+//}
 
 - (BOOL)shouldAutorotate
 {
     return YES;
 }
 
-- (void)setPhotos:(NSArray *)photos
-{
-    if(_photos != photos)
-    {
-        _photos = photos;
-        if(self.tableView.window) [self.tableView reloadData];
-    }
-}
-
 #pragma mark - Table view data source
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    // Return the number of rows in the section.
-    return self.photos.count;
+    return self.recentPhotos.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Flickr Photo";
+    static NSString *CellIdentifier = @"Recent Photo Item";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
     // Configure the cell...
-    NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
+    NSDictionary *photo = [self.recentPhotos objectAtIndex:indexPath.row];
     NSString *title, *description, *auther;
     title = [photo objectForKey:FLICKR_PHOTO_TITLE];
     description = [photo valueForKeyPath:FLICKR_PHOTO_DESCRIPTION];
-//    NSLog(@"%@", description);
     auther = [photo objectForKey:FLICKR_PHOTO_OWNER];
     if(title && title.length)
         cell.textLabel.text = title;
@@ -94,7 +89,7 @@
         cell.detailTextLabel.text = auther;
     else
         cell.detailTextLabel.text = description;
-    
+
     return cell;
 }
 
@@ -139,24 +134,6 @@
 
 #pragma mark - Table view delegate
 
-- (void)record:(NSDictionary *)photo
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *recentPhotos = [[defaults objectForKey:RECENT_PHOTOS_KEY] mutableCopy];
-    if (!recentPhotos)
-        recentPhotos = [NSMutableArray array];
-    else
-    {
-        for (id aPhoto in recentPhotos) {
-            if ([[aPhoto objectForKey:FLICKR_PHOTO_ID] isEqualToString:[photo objectForKey:FLICKR_PHOTO_ID]])
-                return;
-        }
-    }
-    [recentPhotos addObject:photo];
-    [defaults setObject:recentPhotos forKey:RECENT_PHOTOS_KEY];
-    [defaults synchronize];
-}
-
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Navigation logic may go here. Create and push another view controller.
@@ -166,24 +143,15 @@
      // Pass the selected object to the new view controller.
      [self.navigationController pushViewController:detailViewController animated:YES];
      */
-    
-    NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
-    UINavigationController *NVC = [self.splitViewController.viewControllers lastObject];
-    PhotoDisplayViewController *detailVC = NVC.topViewController;
-    detailVC.photo = photo;
-    [detailVC refresh];
-    [self record:photo];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"Photo Display Segue"])
+    if([segue.identifier isEqualToString:@"Recent Photo Display"])
     {
         PhotoDisplayViewController *vc = segue.destinationViewController;
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
-        vc.photo = photo;
-        [self record:photo];
+        vc.photo = [self.recentPhotos objectAtIndex:indexPath.row];
     }
 }
 

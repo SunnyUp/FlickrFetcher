@@ -42,6 +42,7 @@
             NSURL *imageUrl = [FlickrFetcher urlForPhoto:self.photo format:FlickrPhotoFormatLarge];
             NSData *imageData = [NSData dataWithContentsOfURL:imageUrl];
             UIImage *image = [UIImage imageWithData:imageData];
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.navigationItem.rightBarButtonItem = nil;
                 self.imageView.image = image;
