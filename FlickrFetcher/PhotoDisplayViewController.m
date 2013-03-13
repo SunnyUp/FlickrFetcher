@@ -12,30 +12,38 @@
 @interface PhotoDisplayViewController () <UIScrollViewDelegate, UISplitViewControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
+@property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
 @end
 
 @implementation PhotoDisplayViewController
 
 @synthesize photo = _photo;
+@synthesize splitViewBarButtonItem = _splitViewBarButtonItem;
 
-//- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-//{
-//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-//    if (self) {
-//        // Custom initialization
-//    }
-//    return self;
-//}
+- (void)setSplitViewBarButtonItem:(UIBarButtonItem *)splitViewBarButtonItem
+{
+    if(_splitViewBarButtonItem != splitViewBarButtonItem)
+    {
+        NSMutableArray *toolbarItems = [self.toolbar.items mutableCopy];
+        if(_splitViewBarButtonItem) [toolbarItems removeObject:_splitViewBarButtonItem];
+        if(splitViewBarButtonItem) [toolbarItems insertObject:splitViewBarButtonItem atIndex:0];
+        self.toolbar.items = toolbarItems;
+        _splitViewBarButtonItem = splitViewBarButtonItem;
+    }
+}
 
 - (void)refresh
 {
     if(self.photo)
     {
-        self.navigationItem.title = [self.photo objectForKey:FLICKR_PHOTO_TITLE];
+        UIBarButtonItem *titleItem = [self.toolbar.items objectAtIndex:(self.splitViewController?2:1)];
+        titleItem.title = [self.photo objectForKey:FLICKR_PHOTO_TITLE];
         
         UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         [spinner startAnimating];
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
+        NSMutableArray *toolbarItems = [self.toolbar.items mutableCopy];
+        [toolbarItems addObject:[[UIBarButtonItem alloc] initWithCustomView:spinner]];
+        self.toolbar.items = toolbarItems;
         
         dispatch_queue_t downloadQueue = dispatch_queue_create("Flickr Image Downloader", NULL);
         dispatch_async(downloadQueue, ^{
@@ -44,7 +52,9 @@
             UIImage *image = [UIImage imageWithData:imageData];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.navigationItem.rightBarButtonItem = nil;
+                NSMutableArray *toolbarItems = [self.toolbar.items mutableCopy];
+                [toolbarItems removeObject:spinner];
+                self.toolbar.items = toolbarItems;
                 self.imageView.image = image;
                 
                 self.scrollView.contentSize = image.size;
@@ -70,15 +80,29 @@
     [self refresh];
 }
 
-//- (void)didReceiveMemoryWarning
-//{
-//    [super didReceiveMemoryWarning];
-//    // Dispose of any resources that can be recreated.
-//}
+#pragma mark - UIScrollViewDelegate
 
 - (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView
 {
     return self.imageView;
+}
+
+#pragma mark - UISplitViewControllerDelegate
+
+- (BOOL)splitViewController:(UISplitViewController *)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
+{
+    return UIInterfaceOrientationIsPortrait(orientation);
+}
+
+- (void)splitViewController:(UISplitViewController *)svc willHideViewController:(UIViewController *)aViewController withBarButtonItem:(UIBarButtonItem *)barButtonItem forPopoverController:(UIPopoverController *)pc
+{
+    barButtonItem.title = @"List";
+    self.splitViewBarButtonItem = barButtonItem;
+}
+
+- (void)splitViewController:(UISplitViewController *)svc willShowViewController:(UIViewController *)aViewController invalidatingBarButtonItem:(UIBarButtonItem *)barButtonItem
+{
+    self.splitViewBarButtonItem = nil;
 }
 
 @end

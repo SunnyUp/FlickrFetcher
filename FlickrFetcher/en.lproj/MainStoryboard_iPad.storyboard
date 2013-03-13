@@ -112,19 +112,28 @@
             <objects>
                 <viewController id="XWa-s7-3qW" customClass="PhotoDisplayViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1dS-dv-7ia">
-                        <rect key="frame" x="0.0" y="64" width="768" height="960"/>
+                        <rect key="frame" x="0.0" y="20" width="768" height="1004"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" minimumZoomScale="0.20000000000000001" maximumZoomScale="5" id="47m-5A-NAJ">
-                                <rect key="frame" x="-20" y="-20" width="808" height="1000"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <rect key="frame" x="-20" y="44" width="808" height="1068"/>
+                                <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" contentMode="TopLeft" id="Kz7-xv-JAf">
-                                        <rect key="frame" x="20" y="20" width="768" height="960"/>
+                                        <rect key="frame" x="20" y="0.0" width="768" height="1023"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     </imageView>
                                 </subviews>
                             </scrollView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="rcv-JL-iw5">
+                                <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="xUV-7i-0bs"/>
+                                    <barButtonItem title="Photo" style="plain" id="fUh-9Z-m05"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="itO-8J-F7H"/>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
@@ -132,11 +141,12 @@
                     <connections>
                         <outlet property="imageView" destination="Kz7-xv-JAf" id="2pj-NL-EeV"/>
                         <outlet property="scrollView" destination="47m-5A-NAJ" id="qp8-5Y-CR0"/>
+                        <outlet property="toolbar" destination="rcv-JL-iw5" id="U6d-gw-jYf"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EUa-KR-YN5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1075" y="34"/>
+            <point key="canvasLocation" x="259" y="6"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Sc5-VN-X42">
@@ -160,30 +170,12 @@
                     <toolbarItems/>
                     <connections>
                         <segue destination="nu0-J0-04c" kind="relationship" relationship="masterViewController" id="RYp-b8-z64"/>
-                        <segue destination="Y22-y5-u48" kind="relationship" relationship="detailViewController" id="ScM-67-PBl"/>
+                        <segue destination="XWa-s7-3qW" kind="relationship" relationship="detailViewController" id="FAk-IQ-pri"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ddh-DG-jDM" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-932" y="-965"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="S6x-9b-IMw">
-            <objects>
-                <navigationController id="Y22-y5-u48" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="EdS-th-0x5">
-                        <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="XWa-s7-3qW" kind="relationship" relationship="rootViewController" id="GaL-l5-IP9"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="WiF-xC-7IV" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="101" y="34"/>
         </scene>
     </scenes>
     <classes>
@@ -198,6 +190,7 @@
             <relationships>
                 <relationship kind="outlet" name="imageView" candidateClass="UIImageView"/>
                 <relationship kind="outlet" name="scrollView" candidateClass="UIScrollView"/>
+                <relationship kind="outlet" name="toolbar" candidateClass="UIToolbar"/>
             </relationships>
         </class>
         <class className="PhotoTableViewController" superclassName="UITableViewController">

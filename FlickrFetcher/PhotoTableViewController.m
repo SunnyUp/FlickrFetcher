@@ -168,8 +168,7 @@
      */
     
     NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
-    UINavigationController *NVC = [self.splitViewController.viewControllers lastObject];
-    PhotoDisplayViewController *detailVC = NVC.topViewController;
+    PhotoDisplayViewController *detailVC = [self.splitViewController.viewControllers lastObject];
     detailVC.photo = photo;
     [detailVC refresh];
     [self record:photo];

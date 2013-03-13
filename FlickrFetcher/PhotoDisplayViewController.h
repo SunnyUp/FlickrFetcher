@@ -10,6 +10,6 @@
 
 @interface PhotoDisplayViewController : UIViewController
 @property (nonatomic, strong) NSDictionary *photo;
-
+@property (nonatomic, strong) UIBarButtonItem *splitViewBarButtonItem;
 - (void)refresh;
 @end
