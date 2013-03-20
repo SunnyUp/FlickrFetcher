@@ -186,14 +186,11 @@
                             <outlet property="delegate" destination="caA-f3-IeN" id="Y01-w4-jRX"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="City Recent Photos" id="ZXU-kI-GSD">
-                        <barButtonItem key="rightBarButtonItem" title="Refresh" id="wgF-uE-Ldw">
-                            <connections>
-                                <action selector="refresh:" destination="caA-f3-IeN" id="WK3-cn-Tvl"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="City Recent Photos" id="ZXU-kI-GSD"/>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
+                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="snb-YZ-Sct">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </refreshControl>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="E8W-57-EnN" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -262,6 +259,6 @@
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="dEJ-I2-JbX"/>
+        <segue reference="gi8-p7-faH"/>
     </inferredMetricsTieBreakers>
 </document>

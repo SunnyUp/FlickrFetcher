@@ -19,19 +19,17 @@
 @synthesize photos = _photos;
 @synthesize place = _place;
 
-- (IBAction)refresh:(id)sender
+- (void)refresh
 {
-    UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    [spinner startAnimating];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:spinner];
-    
+    [self.refreshControl beginRefreshing];
+    NSLog(@"%@", self.refreshControl);
     dispatch_queue_t downloadQueue = dispatch_queue_create("flickr photo downloader", NULL);
-    dispatch_async(downloadQueue , ^{
+    dispatch_async(downloadQueue, ^{
         NSArray *photos = [FlickrFetcher photosInPlace:self.place maxResults:50];
 //        NSLog(@"%@", photos);
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.navigationItem.rightBarButtonItem = sender;
             self.photos = photos;
+            [self.refreshControl endRefreshing];
         });
     });
 //    dispatch_release(downloadQueue);
@@ -44,9 +42,15 @@
         _place = place;
 //        if(self.tableView.window) [self.tableView reloadData];
         
-        id sender = self.navigationItem.rightBarButtonItem;
-        [self refresh:sender];
+        [self refresh];
     }
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self refresh];
+    [self.refreshControl addTarget:self action:@selector(refresh) forControlEvents:UIControlEventValueChanged];
 }
 
 - (BOOL)shouldAutorotate
