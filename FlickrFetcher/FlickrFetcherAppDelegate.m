@@ -10,6 +10,21 @@
 
 @implementation FlickrFetcherAppDelegate
 
+@synthesize nNetworkActivityCount = _nNetworkActivityCount;
+
+- (void)setNNetworkActivityCount:(NSInteger)nNetworkActivityCount
+{
+    if(_nNetworkActivityCount != nNetworkActivityCount)
+    {
+        if(_nNetworkActivityCount && !nNetworkActivityCount)
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        else if(!_nNetworkActivityCount && nNetworkActivityCount)
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        
+        _nNetworkActivityCount = nNetworkActivityCount;
+   }
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.

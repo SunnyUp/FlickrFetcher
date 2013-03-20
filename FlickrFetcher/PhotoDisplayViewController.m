@@ -6,6 +6,7 @@
 //  Copyright (c) 2013年 SunnyUp. All rights reserved.
 //
 
+#import "FlickrFetcherAppDelegate.h"
 #import "PhotoDisplayViewController.h"
 #import "FlickrFetcher.h"
 
@@ -13,11 +14,12 @@
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
 @end
 
 @implementation PhotoDisplayViewController
 
-@synthesize photo = _photo;
+@synthesize imageURL = _imageURL;
 @synthesize splitViewBarButtonItem = _splitViewBarButtonItem;
 
 - (void)setSplitViewBarButtonItem:(UIBarButtonItem *)splitViewBarButtonItem
@@ -32,34 +34,43 @@
     }
 }
 
+- (void)setImageURL:(NSURL *)imageURL
+{
+    if(_imageURL != imageURL)
+    {
+        _imageURL = imageURL;
+        [self refresh];
+    }
+}
+
 - (void)refresh
 {
-    if(self.photo)
-    {
-        UIBarButtonItem *titleItem = [self.toolbar.items objectAtIndex:(self.splitViewController?2:1)];
-        titleItem.title = [self.photo objectForKey:FLICKR_PHOTO_TITLE];
-        
-        UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        [spinner startAnimating];
-        NSMutableArray *toolbarItems = [self.toolbar.items mutableCopy];
-        [toolbarItems addObject:[[UIBarButtonItem alloc] initWithCustomView:spinner]];
-        self.toolbar.items = toolbarItems;
-        
+    if(self.scrollView)
+    {        
+        [self.spinner startAnimating];
+        FlickrFetcherAppDelegate *app = [[UIApplication sharedApplication] delegate];
+        app.nNetworkActivityCount++;
+        NSURL *imageURL = self.imageURL;
         dispatch_queue_t downloadQueue = dispatch_queue_create("Flickr Image Downloader", NULL);
         dispatch_async(downloadQueue, ^{
-            NSURL *imageUrl = [FlickrFetcher urlForPhoto:self.photo format:FlickrPhotoFormatLarge];
-            NSData *imageData = [NSData dataWithContentsOfURL:imageUrl];
+            //TODO: trying to stop the download queue while the downloading image is not interested by the user
+            NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
             UIImage *image = [UIImage imageWithData:imageData];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSMutableArray *toolbarItems = [self.toolbar.items mutableCopy];
-                [toolbarItems removeObject:spinner];
-                self.toolbar.items = toolbarItems;
-                self.imageView.image = image;
-                
-                self.scrollView.contentSize = image.size;
-                self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height);
-            });
+            if(imageURL == self.imageURL)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if(image)
+                    {
+                        self.scrollView.zoomScale = 1.0;
+                        self.scrollView.contentSize = image.size;
+                        self.imageView.image = image;
+                        self.imageView.frame = CGRectMake(0, 0, image.size.width, image.size.height);
+                    }
+                    
+                    [self.spinner stopAnimating];
+                    app.nNetworkActivityCount--;
+                });
+            }
         });
         //        dispatch_release(downloadQueue);
     }

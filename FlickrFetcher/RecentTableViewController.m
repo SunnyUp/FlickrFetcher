@@ -151,7 +151,8 @@
     {
         PhotoDisplayViewController *vc = segue.destinationViewController;
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
-        vc.photo = [self.recentPhotos objectAtIndex:indexPath.row];
+        NSDictionary *photo = [self.recentPhotos objectAtIndex:indexPath.row];
+        vc.imageURL = [FlickrFetcher urlForPhoto:photo format:FlickrPhotoFormatLarge];
     }
 }
 
