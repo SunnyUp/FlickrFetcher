@@ -27,8 +27,18 @@
     dispatch_async(downloadQueue, ^{
         NSArray *photos = [FlickrFetcher photosInPlace:self.place maxResults:50];
 //        NSLog(@"%@", photos);
+        NSArray *vPhotos = [photos sortedArrayUsingComparator:^(id obj1, id obj2){
+            NSString *str1 = [obj1 objectForKey:FLICKR_PHOTO_TITLE];
+            NSString *str2 = [obj2 objectForKey:FLICKR_PHOTO_TITLE];
+            if(str1 == nil || str1.length == 0)
+                return NSOrderedDescending;
+            else if(str2 == nil || str2.length == 0)
+                return NSOrderedAscending;
+            
+            return [str1 compare:str2];
+        }];
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.photos = photos;
+            self.photos = vPhotos;
             [self.refreshControl endRefreshing];
         });
     });
