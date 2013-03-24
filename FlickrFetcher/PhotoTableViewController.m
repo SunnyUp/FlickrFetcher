@@ -183,7 +183,8 @@
     
     NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
     PhotoDisplayViewController *detailVC = [self.splitViewController.viewControllers lastObject];
-    detailVC.imageURL = [FlickrFetcher urlForPhoto:photo format:FlickrPhotoFormatLarge];
+//    detailVC.imageURL = [FlickrFetcher urlForPhoto:photo format:FlickrPhotoFormatLarge];
+    detailVC.photo = photo;
     [self record:photo];
 }
 
@@ -194,7 +195,8 @@
         PhotoDisplayViewController *vc = segue.destinationViewController;
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         NSDictionary *photo = [self.photos objectAtIndex:indexPath.row];
-        vc.imageURL = [FlickrFetcher urlForPhoto:photo format:FlickrPhotoFormatLarge];
+//        vc.imageURL = [FlickrFetcher urlForPhoto:photo format:FlickrPhotoFormatLarge];
+        vc.photo = photo;
         [self record:photo];
     }
 }

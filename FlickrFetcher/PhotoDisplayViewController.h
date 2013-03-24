@@ -9,7 +9,9 @@
 #import <UIKit/UIKit.h>
 
 @interface PhotoDisplayViewController : UIViewController
-@property (nonatomic, strong) NSURL *imageURL;
+//@property (nonatomic, strong) NSURL *imageURL;
+@property (nonatomic, strong) NSDictionary *photo;
 @property (nonatomic, strong) UIBarButtonItem *splitViewBarButtonItem;
 - (void)refresh;
+- (NSData *)imageData:(NSDictionary *)photo;
 @end

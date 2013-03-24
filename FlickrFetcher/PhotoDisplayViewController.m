@@ -19,7 +19,8 @@
 
 @implementation PhotoDisplayViewController
 
-@synthesize imageURL = _imageURL;
+//@synthesize imageURL = _imageURL;
+@synthesize photo = _photo;
 @synthesize splitViewBarButtonItem = _splitViewBarButtonItem;
 
 - (void)setSplitViewBarButtonItem:(UIBarButtonItem *)splitViewBarButtonItem
@@ -33,14 +34,50 @@
         _splitViewBarButtonItem = splitViewBarButtonItem;
     }
 }
+//
+//- (void)setImageURL:(NSURL *)imageURL
+//{
+//    if(_imageURL != imageURL)
+//    {
+//        _imageURL = imageURL;
+//        [self refresh];
+//    }
+//}
 
-- (void)setImageURL:(NSURL *)imageURL
+- (void)setPhoto:(NSDictionary *)photo
 {
-    if(_imageURL != imageURL)
+    if(_photo != photo)
     {
-        _imageURL = imageURL;
+        _photo = photo;
         [self refresh];
     }
+}
+
+- (NSData *)imageData:(NSDictionary *)photo
+{
+    FlickrFetcherAppDelegate *app = [[UIApplication sharedApplication] delegate];
+    NSDictionary *cacheTable = app.cacleTable;
+    NSString *photoID = [photo objectForKey:FLICKR_PHOTO_ID];
+    NSURL *imageURL = [cacheTable objectForKey:photoID];
+    if(imageURL == nil)
+        imageURL = [FlickrFetcher urlForPhoto:photo format:FlickrPhotoFormatLarge];
+    NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+    if(![imageURL isFileURL])
+    {
+        //to cache the image data
+        NSFileManager *fileManager = [[NSFileManager alloc] init];
+        NSArray *urls = [fileManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
+        NSURL *cacheURL = [urls objectAtIndex:0];
+        cacheURL = [cacheURL URLByAppendingPathComponent:photoID];
+        cacheURL = [cacheURL URLByAppendingPathExtension:@"jpg"];
+        [imageData writeToURL:cacheURL atomically:YES];
+        
+        NSMutableDictionary *vCacheTable = [cacheTable mutableCopy];
+        [vCacheTable setObject:cacheURL forKey:photoID];
+        app.cacleTable = [vCacheTable copy];
+    }
+    
+    return imageData;
 }
 
 - (void)refresh
@@ -50,13 +87,13 @@
         [self.spinner startAnimating];
         FlickrFetcherAppDelegate *app = [[UIApplication sharedApplication] delegate];
         app.nNetworkActivityCount++;
-        NSURL *imageURL = self.imageURL;
+        NSDictionary *photo = self.photo;
         dispatch_queue_t downloadQueue = dispatch_queue_create("Flickr Image Downloader", NULL);
         dispatch_async(downloadQueue, ^{
             //TODO: trying to stop the download queue while the downloading image is not interested by the user
-            NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+            NSData *imageData = [self imageData:self.photo];
             UIImage *image = [UIImage imageWithData:imageData];
-            if(imageURL == self.imageURL)
+            if(photo == self.photo)
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if(image)

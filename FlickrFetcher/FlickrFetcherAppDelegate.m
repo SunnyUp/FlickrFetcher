@@ -11,6 +11,7 @@
 @implementation FlickrFetcherAppDelegate
 
 @synthesize nNetworkActivityCount = _nNetworkActivityCount;
+@synthesize cacleTable = _cacleTable;
 
 - (void)setNNetworkActivityCount:(NSInteger)nNetworkActivityCount
 {
@@ -25,9 +26,26 @@
    }
 }
 
+- (void)loadCacheTable
+{
+    NSFileManager *fileManager = [[NSFileManager alloc] init];
+    NSArray *urls = [fileManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
+    NSURL *cacheURL = [urls objectAtIndex:0];
+    NSString *cachePath = [cacheURL path];
+    NSArray *cacheFiles = [fileManager contentsOfDirectoryAtPath:cachePath error:nil];
+    NSMutableDictionary *vCacheTable = [[NSMutableDictionary alloc] init];
+    for (NSString *filePath in cacheFiles) {
+        NSString *photoID = [filePath stringByDeletingPathExtension];
+        NSURL *fileURL = [cacheURL URLByAppendingPathComponent:filePath];
+        [vCacheTable setObject:fileURL forKey:photoID];
+    }
+    self.cacleTable = [vCacheTable copy];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    [self loadCacheTable];
     return YES;
 }
 							

@@ -13,5 +13,6 @@
 @property (strong, nonatomic) UIWindow *window;
 
 @property (nonatomic) NSInteger nNetworkActivityCount;
+@property (nonatomic, strong) NSDictionary *cacleTable;
 
 @end
